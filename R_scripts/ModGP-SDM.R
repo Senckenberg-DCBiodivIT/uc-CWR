@@ -201,10 +201,6 @@ FUN.ExecSDM <- function(SDMData_ls = NULL, # list of presences/absences per spec
 		return(SDMModel_ls)
 	}
 	
-	### Loading rasters into memory ----
-	BV_ras <- readAll(BV_ras)
-	Drivers <- readAll(Drivers)
-	
 	### Parallel Set-Up ----
 	if(parallel == 1){parallel <- NULL} # no parallelisation
 	
