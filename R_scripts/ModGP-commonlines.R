@@ -33,9 +33,7 @@ package_vec <- c(
 sapply(package_vec, install.load.package)
 
 ### NON-CRAN PACKAGES ----
-if(packageVersion("KrigR") < "0.9.6.1"){ # KrigR check
-	devtools::install_github("https://github.com/ErikKusch/KrigR", ref = "Development")
-}
+devtools::install_github("https://github.com/LeniPe/KrigR", ref = "add-alternative-data-source-DEDL")
 library(KrigR)
 
 if("mraster" %in% rownames(installed.packages()) == FALSE){ # KrigR check
