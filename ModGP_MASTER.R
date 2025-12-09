@@ -100,11 +100,11 @@ BV_ras <- FUN.DownBV(T_Start = 1985, # what year to begin climatology calculatio
 ## Posthoc Data -----------------------------------------------------------
 message("Retrieving additional covariates")
 #' For relating SDM outputs to other characteristics of interest to users
-PH_nutrient <- raster("https://www.fao.org/fileadmin/user_upload/soils/docs/HWSD/Soil_Quality_data/sq1.asc")
-PH_toxicity <- raster("https://www.fao.org/fileadmin/user_upload/soils/docs/HWSD/Soil_Quality_data/sq6.asc")
-PH_stack <- stack(PH_nutrient, PH_toxicity)
-PH_stack <- raster::resample(PH_stack, BV_ras[[1]])
-PH_stack <- stack(PH_stack, BV_ras$BIO1, BV_ras$BIO12)
+PH_nutrient <- terra::rast("https://www.fao.org/fileadmin/user_upload/soils/docs/HWSD/Soil_Quality_data/sq1.asc")
+PH_toxicity <- terra::rast("https://www.fao.org/fileadmin/user_upload/soils/docs/HWSD/Soil_Quality_data/sq6.asc")
+PH_stack <-c(PH_nutrient, PH_toxicity)
+PH_stack <- terra::resample(PH_stack, BV_ras[[1]])
+PH_stack <- c(PH_stack, BV_ras$BIO1, BV_ras$BIO12)
 names(PH_stack) <- c("Nutrient", "Toxicity", "Temperature", "Soil Moisture")
 
 ## SDM Data Preparations --------------------------------------------------

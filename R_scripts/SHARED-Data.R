@@ -195,7 +195,7 @@ FUN.DownBV <- function(T_Start = 1970, # what year to begin climatology calculat
 	FNAME <- file.path(Dir, paste0("BV_", T_Start, "-", T_End, "_DEDL.nc"))
 	
 	if(!Force & file.exists(FNAME)){
-		BV_ras <- stack(FNAME)
+		BV_ras <- terra::rast(FNAME)
 		names(BV_ras) <- paste0("BIO", 1:19)
 		message("Data has already been downloaded with these specifications previously. It has been loaded from the disk. If you wish to override the present data, please specify Force = TRUE")
 		return(BV_ras)

@@ -69,7 +69,7 @@ FUN.PrepSDMData <- function(occ_ls = NULL, # list of occurrences per species in 
 		print(unique(SDMData_iter$species))
 		
 		### Initial Environmental NA match Removal ----
-		NAcheck <- raster::extract(BV_ras, st_coordinates(Presences_sf), df = TRUE)
+		NAcheck <- terra::extract(BV_ras, st_coordinates(Presences_sf))
 		Presences_sf <- Presences_sf[!is.na(rowSums(NAcheck)), ]
 		if(nrow(Presences_sf) < 1){
 			PA_df <- data.frame(Presences_sf)
@@ -79,8 +79,8 @@ FUN.PrepSDMData <- function(occ_ls = NULL, # list of occurrences per species in 
 			
 			### Environmental Data Colinearity ----
 			BV_iter <- crop(BV_ras, extent(st_bbox(buffer_sf)))
-			BV_iter <- mask(BV_iter, as(buffer_sf, "Spatial"))
-			v <- usdm::vifcor(terra::rast(BV_iter), th = 0.7) # variable inflation factor
+			BV_iter <- mask(BV_iter, terra::vect(buffer_sf))
+			v <- usdm::vifcor(BV_iter, th = 0.7) # variable inflation factor
 			biomod <- exclude(BV_iter, v) # now exclude those with high cor and vif
 			
 			### Pseudoabsences ----
@@ -132,7 +132,7 @@ FUN.PrepSDMData <- function(occ_ls = NULL, # list of occurrences per species in 
 			uniquecells <- 0
 		}else{
 			## load covariates raster in
-			cov <- rast(readAll(BV_ras)[[1]])
+			cov <- BV_ras[[1]]
 			cov_crs <- st_crs(cov)
 			## assign correct crs
 			Occ_sf <- st_as_sf(Occ_df, crs = '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0')
@@ -280,6 +280,7 @@ FUN.ExecSDM <- function(SDMData_ls = NULL, # list of presences/absences per spec
 																											 setting = list(method = "weighted", 
 																											 							 stat = "tss", opt = 2), 
 																											 overwrite = TRUE)
+					ensemble_SDM <- raster::raster(ensemble_SDM)
 															## evaluate models
 															eval_SDM <- getEvaluation(model_SDM, stat = c("TSS", "threshold"))
 															## prediction
@@ -325,7 +326,7 @@ FUN.ExecSDM <- function(SDMData_ls = NULL, # list of presences/absences per spec
 															unlink(list.files(Dir.Species, pattern = "SDMModel", full.names = TRUE))
 														}
 														
-														if(length(list.files(Dir.Species, pattern = "RESPCURV")) == nlayers(Drivers)){
+			if(length(list.files(Dir.Species, pattern = "RESPCURV")) == terra::nlyr(Drivers)){
 															message("Shiny data and plots already produced.")
 														}else{
 															# MAKING SHINY OUTPUTS ----
@@ -335,7 +336,7 @@ FUN.ExecSDM <- function(SDMData_ls = NULL, # list of presences/absences per spec
 															Plots_ls <- FUN.Viz(Shiny_ls, 
 																									Model_ras = stack(SDMData_ls$Prediction$continuous,
 																																		SDMData_ls$Prediction$proportion), 
-																									BV_ras, Covariates = Drivers,
+														BV_ras, Covariates = raster::raster(Drivers),
 																									CutOff = 0.6,
 																									Dir_spec = Dir.Species)
 														}
