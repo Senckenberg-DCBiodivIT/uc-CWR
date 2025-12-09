@@ -18,17 +18,17 @@ FUN.PrepSDMData <- function(occ_ls = NULL, # list of occurrences per species in 
 														Force = FALSE, # whether to force re-running
 														parallel = 1 # an integer, 1 = sequential
 ){
-
-
-    # Check if occ_ls is NULL or empty
-    if (is.null(occ_ls) || length(occ_ls) == 0) {
-        stop("occ_ls is either NULL or empty.")
-    }
-
-    # Check if names(occ_ls) are character
-    if (!is.character(names(occ_ls))) {
-        stop("The names of occ_ls are not character strings.")
-    }
+	
+	
+	# Check if occ_ls is NULL or empty
+	if (is.null(occ_ls) || length(occ_ls) == 0) {
+		stop("occ_ls is either NULL or empty.")
+	}
+	
+	# Check if names(occ_ls) are character
+	if (!is.character(names(occ_ls))) {
+		stop("The names of occ_ls are not character strings.")
+	}
 	
 	FNAME <- file.path(Dir, paste0(strsplit(names(occ_ls)[1], split = " ")[[1]][1], "_SDMData.RData"))
 	
@@ -62,94 +62,94 @@ FUN.PrepSDMData <- function(occ_ls = NULL, # list of occurrences per species in 
 	### Preparing Data Species by Species ----
 	message("Figuring out Presences and Absences for each species")
 	SDMData_ls <- pblapply(occ_ls, 
-												cl = parallel,
-												FUN = function(SDMData_iter){
-		# SDMData_iter <- occ_ls[[1]]
-		Presences_sf <- SDMData_iter["species"]
-		print(unique(SDMData_iter$species))
-		
-		### Initial Environmental NA match Removal ----
-		NAcheck <- terra::extract(BV_ras, st_coordinates(Presences_sf))
-		Presences_sf <- Presences_sf[!is.na(rowSums(NAcheck)), ]
-		if(nrow(Presences_sf) < 1){
-			PA_df <- data.frame(Presences_sf)
-		}else{
-			### Training Region Limiting ----
-			buffer_sf <- st_union(st_buffer(Presences_sf, 15)) # 15 degree buffer around points
-			
-			### Environmental Data Colinearity ----
-			BV_iter <- crop(BV_ras, extent(st_bbox(buffer_sf)))
-			BV_iter <- mask(BV_iter, terra::vect(buffer_sf))
-			v <- usdm::vifcor(BV_iter, th = 0.7) # variable inflation factor
-			biomod <- exclude(BV_iter, v) # now exclude those with high cor and vif
-			
-			### Pseudoabsences ----
-			#' to generate pseudo-absence points. 1e4 randomly selected points where the model target is absent but other species are present this can be further modified - for example limiting it by minimum convex that encompasses only 90% of the occurrence data 10% of the distant occurrence points won't be considered 
-			#' Absences
-			SpeciesNon_sf <- Species_sf[Species_sf$species != unique(SDMData_iter$species), ] # select non-target species records
-			SpeciesNon_sf <- st_filter(SpeciesNon_sf, buffer_sf) # select only those in buffered area
-			set.seed(42) # setting seed for reproducibly random process
-			Absences_sf <- SpeciesNon_sf[sample(1:nrow(SpeciesNon_sf), 
-																					size = ifelse(nrow(SpeciesNon_sf)>1e4, 1e4, nrow(SpeciesNon_sf))), ] # select absences
-			Absences_sf$PRESENCE <- 0 # assign absence	
-			#' Presences
-			Presences_sf <- SDMData_iter
-			Presences_sf$PRESENCE <- 1 # assign presence
-			
-			### Combining PA and P data ----
-			PA_sf <- rbind(Absences_sf, Presences_sf)
-			
-			### Extracting Environmental data ----
-			Predictors <- raster::extract(biomod, st_coordinates(PA_sf))
-			PA_sf <- cbind(PA_sf, Predictors)
-			
-			### Making into dataframe ----
-			PA_df <- as.data.frame(PA_sf)
-			lon <- PA_df$lon <- st_coordinates(PA_sf)[,1]
-			lat <- PA_df$lat <- st_coordinates(PA_sf)[,2]
-			# PA_df <- na.omit(PA_df)
-		}
-		
-		### Creating SDM Input Object ----
-		if(nrow(PA_df) == 0){
-			data_SDM <- NA
-		}else{
-			data_SDM <- sdmData(PRESENCE~.+coords(lon+lat), 
-													train = na.omit(PA_df[
-														, c("lon","lat","PRESENCE", colnames(Predictors))
-													])
-													)
-		}
-		
-		### Unique Locations & Observations ----
-		Occ_df <- PA_df
-		spec_name <- unique(Occ_df$species[Occ_df$PRESENCE == 1])
-		Occ_df$modelSpec <- spec_name
-		
-		## identify useable data
-		if(nrow(Occ_df) == 0){
-			useableocc <- 0
-			uniquecells <- 0
-		}else{
-			## load covariates raster in
-			cov <- BV_ras[[1]]
-			cov_crs <- st_crs(cov)
-			## assign correct crs
-			Occ_sf <- st_as_sf(Occ_df, crs = '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0')
-			Occ_sf <- st_transform(Occ_sf, crs = cov_crs)
-			## filter additionally by covariate data
-			valsext <- terra::extract(y = Occ_sf[Occ_sf$PRESENCE == 1, ], x = cov)
-			useableocc <- sum(!is.na(valsext$BIO1))
-			## identify unique cells filled by occurrences
-			uniquecells <- sum(values(rasterize(Occ_sf, cov, field = "PRESENCE"))[,1] == 1, na.rm = TRUE)
-		}
-		
-		### Returning to outside of apply ----
-		list(PA = PA_df,
-				 SDMData = data_SDM,
-				 Useable = data.frame(locs = useableocc, cells = uniquecells))
-		
-	})
+												 cl = parallel,
+												 FUN = function(SDMData_iter){
+												 	# SDMData_iter <- occ_ls[[1]]
+												 	Presences_sf <- SDMData_iter["species"]
+												 	print(unique(SDMData_iter$species))
+												 	
+												 	### Initial Environmental NA match Removal ----
+												 	NAcheck <- terra::extract(BV_ras, st_coordinates(Presences_sf))
+												 	Presences_sf <- Presences_sf[!is.na(rowSums(NAcheck)), ]
+												 	if(nrow(Presences_sf) < 1){
+												 		PA_df <- data.frame(Presences_sf)
+												 	}else{
+												 		### Training Region Limiting ----
+												 		buffer_sf <- st_union(st_buffer(Presences_sf, 15)) # 15 degree buffer around points
+												 		
+												 		### Environmental Data Colinearity ----
+												 		BV_iter <- crop(BV_ras, extent(st_bbox(buffer_sf)))
+												 		BV_iter <- mask(BV_iter, terra::vect(buffer_sf))
+												 		v <- usdm::vifcor(BV_iter, th = 0.7) # variable inflation factor
+												 		biomod <- exclude(BV_iter, v) # now exclude those with high cor and vif
+												 		
+												 		### Pseudoabsences ----
+												 		#' to generate pseudo-absence points. 1e4 randomly selected points where the model target is absent but other species are present this can be further modified - for example limiting it by minimum convex that encompasses only 90% of the occurrence data 10% of the distant occurrence points won't be considered 
+												 		#' Absences
+												 		SpeciesNon_sf <- Species_sf[Species_sf$species != unique(SDMData_iter$species), ] # select non-target species records
+												 		SpeciesNon_sf <- st_filter(SpeciesNon_sf, buffer_sf) # select only those in buffered area
+												 		set.seed(42) # setting seed for reproducibly random process
+												 		Absences_sf <- SpeciesNon_sf[sample(1:nrow(SpeciesNon_sf), 
+												 																				size = ifelse(nrow(SpeciesNon_sf)>1e4, 1e4, nrow(SpeciesNon_sf))), ] # select absences
+												 		Absences_sf$PRESENCE <- 0 # assign absence	
+												 		#' Presences
+												 		Presences_sf <- SDMData_iter
+												 		Presences_sf$PRESENCE <- 1 # assign presence
+												 		
+												 		### Combining PA and P data ----
+												 		PA_sf <- rbind(Absences_sf, Presences_sf)
+												 		
+												 		### Extracting Environmental data ----
+												 		Predictors <- raster::extract(biomod, st_coordinates(PA_sf))
+												 		PA_sf <- cbind(PA_sf, Predictors)
+												 		
+												 		### Making into dataframe ----
+												 		PA_df <- as.data.frame(PA_sf)
+												 		lon <- PA_df$lon <- st_coordinates(PA_sf)[,1]
+												 		lat <- PA_df$lat <- st_coordinates(PA_sf)[,2]
+												 		# PA_df <- na.omit(PA_df)
+												 	}
+												 	
+												 	### Creating SDM Input Object ----
+												 	if(nrow(PA_df) == 0){
+												 		data_SDM <- NA
+												 	}else{
+												 		data_SDM <- sdmData(PRESENCE~.+coords(lon+lat), 
+												 												train = na.omit(PA_df[
+												 													, c("lon","lat","PRESENCE", colnames(Predictors))
+												 												])
+												 		)
+												 	}
+												 	
+												 	### Unique Locations & Observations ----
+												 	Occ_df <- PA_df
+												 	spec_name <- unique(Occ_df$species[Occ_df$PRESENCE == 1])
+												 	Occ_df$modelSpec <- spec_name
+												 	
+												 	## identify useable data
+												 	if(nrow(Occ_df) == 0){
+												 		useableocc <- 0
+												 		uniquecells <- 0
+												 	}else{
+												 		## load covariates raster in
+												 		cov <- BV_ras[[1]]
+												 		cov_crs <- st_crs(cov)
+												 		## assign correct crs
+												 		Occ_sf <- st_as_sf(Occ_df, crs = '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0')
+												 		Occ_sf <- st_transform(Occ_sf, crs = cov_crs)
+												 		## filter additionally by covariate data
+												 		valsext <- terra::extract(y = Occ_sf[Occ_sf$PRESENCE == 1, ], x = cov)
+												 		useableocc <- sum(!is.na(valsext$BIO1))
+												 		## identify unique cells filled by occurrences
+												 		uniquecells <- sum(values(rasterize(Occ_sf, cov, field = "PRESENCE"))[,1] == 1, na.rm = TRUE)
+												 	}
+												 	
+												 	### Returning to outside of apply ----
+												 	list(PA = PA_df,
+												 			 SDMData = data_SDM,
+												 			 Useable = data.frame(locs = useableocc, cells = uniquecells))
+												 	
+												 })
 	
 	### Limitting to useable species ----
 	useablespec_df <- do.call(rbind, lapply(SDMData_ls, "[[", "Useable"))
@@ -216,7 +216,7 @@ FUN.ExecSDM <- function(SDMData_ls = NULL, # list of presences/absences per spec
 			"BV_ras", "Drivers", "Dir", "Dir.Genus", "Dir.Base",
 			"GenName", "FUN.Viz", "FUN.ShinyPrep", "Plot_BC", "%nin%",
 			"parallel", "RUNNING_ON_LUMI", "RUNNING_ON_DESTINE", "saveObj", "loadObj")
-		, envir = environment())
+			, envir = environment())
 		print("R Packages loading on cluster")
 		clusterpacks <- clusterCall(parallel, function() sapply(package_vec, install.load.package))
 	}
@@ -260,7 +260,7 @@ FUN.ExecSDM <- function(SDMData_ls = NULL, # list of presences/absences per spec
 																SDMpar <- ifelse(!is.null(parallel), 1, parallel::detectCores())
 																parallelSetting = list(ncore = SDMpar, method = "parallel")
 															}
-
+															
 															## executing mdeols
 															model_SDM <- sdm(~., data_SDM,
 																							 methods = c("maxent","gbm","GAM"),
@@ -268,24 +268,24 @@ FUN.ExecSDM <- function(SDMData_ls = NULL, # list of presences/absences per spec
 																							 test.p = 25,
 																							 n = 2,
 																							 parallelSetting = parallelSetting
-																							 )
+															)
 															save(model_SDM, file = file.path(Dir.Species, "SDMModel.RData"))
 															## building ensemble
 															ensemble_SDM <- ensemble(model_SDM, BV_ras, 
-																	 filename = file.path(Dir.Species, "ensemble.tif"), 
+																											 filename = file.path(Dir.Species, "ensemble.tif"), 
 																											 setting = list(method = "weighted", 
 																											 							 stat = "tss", opt = 2), 
 																											 overwrite = TRUE)
-					ensemble_SDM <- raster::raster(ensemble_SDM)
+															ensemble_SDM <- raster::raster(ensemble_SDM)
 															## evaluate models
 															eval_SDM <- getEvaluation(model_SDM, stat = c("TSS", "threshold"))
 															## prediction
 															prediction_SDM <- predict(model_SDM, BV_ras, 
-																	filename = file.path(Dir.Species, "prediction.tif"), 
+																												filename = file.path(Dir.Species, "prediction.tif"), 
 																												overwrite = TRUE)
 															# this block is needed to load fully into memory
 															modelnames <- with(model_SDM@run.info, paste(method, replication, replicationID, sep ="-"))
-				prediction_SDM <- stack(file.path(Dir.Species, "prediction.tif")) # index on drive
+															prediction_SDM <- stack(file.path(Dir.Species, "prediction.tif")) # index on drive
 															prediction_SDM <- readAll(prediction_SDM) # load fully from file
 															names(prediction_SDM) <- modelnames # assign names back on
 															binarised_SDM <- prediction_SDM > eval_SDM$threshold ## is this correct!!!
@@ -293,13 +293,13 @@ FUN.ExecSDM <- function(SDMData_ls = NULL, # list of presences/absences per spec
 															
 															## save rasters
 															raster::writeRaster(ensemble_SDM, 
-														filename = file.path(Dir.Species, "Continuous.nc"), format = "CDF", overwrite = TRUE)
+																									filename = file.path(Dir.Species, "Continuous.nc"), format = "CDF", overwrite = TRUE)
 															raster::writeRaster(prediction_SDM, 
-														filename = file.path(Dir.Species, "MODELS-Continuous.nc"), format = "CDF", overwrite = TRUE)
+																									filename = file.path(Dir.Species, "MODELS-Continuous.nc"), format = "CDF", overwrite = TRUE)
 															raster::writeRaster(binarised_SDM, 
-														filename = file.path(Dir.Species, "MODELS-Binarised.nc"), format = "CDF", overwrite = TRUE)
+																									filename = file.path(Dir.Species, "MODELS-Binarised.nc"), format = "CDF", overwrite = TRUE)
 															raster::writeRaster(proportion_SDM, 
-														filename = file.path(Dir.Species, "Proportion.nc"), format = "CDF", overwrite = TRUE)
+																									filename = file.path(Dir.Species, "Proportion.nc"), format = "CDF", overwrite = TRUE)
 															
 															## make a list of outputs
 															SDMData_ls <- list(
@@ -312,16 +312,16 @@ FUN.ExecSDM <- function(SDMData_ls = NULL, # list of presences/absences per spec
 																	MODELS_continuous = prediction_SDM,
 																	MODELS_binarised = binarised_SDM
 																)
-																)
+															)
 															saveObj(SDMData_ls, file = FNAMEInner)
 															
 															## unlink SDM workflow files
-				# unlink(list.files(Dir.Species, pattern = "prediction", full.names = TRUE))
-				# unlink(list.files(Dir.Species, pattern = "ensemble", full.names = TRUE))
-				# unlink(list.files(Dir.Species, pattern = "SDMModel", full.names = TRUE))
+															# unlink(list.files(Dir.Species, pattern = "prediction", full.names = TRUE))
+															# unlink(list.files(Dir.Species, pattern = "ensemble", full.names = TRUE))
+															# unlink(list.files(Dir.Species, pattern = "SDMModel", full.names = TRUE))
 														}
 														
-			if(length(list.files(Dir.Species, pattern = "RESPCURV")) == terra::nlyr(Drivers)){
+														if(length(list.files(Dir.Species, pattern = "RESPCURV")) == terra::nlyr(Drivers)){
 															message("Shiny data and plots already produced.")
 														}else{
 															# MAKING SHINY OUTPUTS ----
@@ -331,7 +331,7 @@ FUN.ExecSDM <- function(SDMData_ls = NULL, # list of presences/absences per spec
 															Plots_ls <- FUN.Viz(Shiny_ls, 
 																									Model_ras = stack(SDMData_ls$Prediction$continuous,
 																																		SDMData_ls$Prediction$proportion), 
-														BV_ras, Covariates = raster::raster(Drivers),
+																									BV_ras, Covariates = raster::raster(Drivers),
 																									CutOff = 0.6,
 																									Dir_spec = Dir.Species)
 														}

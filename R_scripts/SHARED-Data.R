@@ -147,7 +147,7 @@ FUN.DownGBIF <- function(species = NULL, # species name as character for whose g
 									occs = specs_ls
 									# ,
 									# json = JSON_ls
-									)
+	)
 	
 	saveObj(save_ls, file = FNAME)
 	unlink(occ_get) # removes .zip file
@@ -191,7 +191,7 @@ FUN.DownBV <- function(T_Start = 1970, # what year to begin climatology calculat
 											 Force = FALSE, # do not overwrite already present data
 											 DEDL = FALSE, 
 											 Cores = 1
-											 ){
+){
 	FNAME <- file.path(Dir, paste0("BV_", T_Start, "-", T_End, "_DEDL.nc"))
 	
 	if(!Force & file.exists(FNAME)){
@@ -295,6 +295,6 @@ FUN.DownBV <- function(T_Start = 1970, # what year to begin climatology calculat
 	con <- file(file.path(Dir, paste0(tools::file_path_sans_ext(basename(FNAME)), ".json")))
 	writeLines(jsonlite::toJSON(JSON_ls, pretty = TRUE), con)
 	close(con)
-
+	
 	BV_ras
 }

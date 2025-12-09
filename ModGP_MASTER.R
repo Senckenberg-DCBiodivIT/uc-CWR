@@ -85,7 +85,7 @@ Species_ls <- FUN.DownGBIF(
 	Force = FALSE, # do not overwrite already present data
 	Mode = "ModGP", # query download for entire genus
 	parallel = 1 # no speed gain here for parallelising on personal machine
-	)
+)
 
 ## Environmental Data -----------------------------------------------------
 message("Retrieving environmental data")
@@ -95,7 +95,7 @@ BV_ras <- FUN.DownBV(T_Start = 1985, # what year to begin climatology calculatio
 										 Force = FALSE, # do not overwrite already present data
 										 DEDL = DEDL, 
 										 Cores = numberOfCores
-										 )
+)
 
 ## Posthoc Data -----------------------------------------------------------
 message("Retrieving additional covariates")
@@ -114,7 +114,7 @@ SDMInput_ls <- FUN.PrepSDMData(occ_ls = Species_ls$occs, # list of occurrence da
 															 Dir = Dir.Data.ModGP, # where to store the data output on disk
 															 Force = FALSE, # # do not overwrite already present data
 															 parallel = numberOfCores # parallelised execution
-															 )
+)
 
 # ANALYSIS ================================================================
 ## SDM Execution ----------------------------------------------------------
