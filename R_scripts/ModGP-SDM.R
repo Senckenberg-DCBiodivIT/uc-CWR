@@ -272,7 +272,7 @@ FUN.ExecSDM <- function(SDMData_ls = NULL, # list of presences/absences per spec
 															save(model_SDM, file = file.path(Dir.Species, "SDMModel.RData"))
 															## building ensemble
 															ensemble_SDM <- ensemble(model_SDM, BV_ras, 
-																											 filename = file.path(Dir.Species, "ensemble"), 
+																	 filename = file.path(Dir.Species, "ensemble.tif"), 
 																											 setting = list(method = "weighted", 
 																											 							 stat = "tss", opt = 2), 
 																											 overwrite = TRUE)
@@ -281,12 +281,11 @@ FUN.ExecSDM <- function(SDMData_ls = NULL, # list of presences/absences per spec
 															eval_SDM <- getEvaluation(model_SDM, stat = c("TSS", "threshold"))
 															## prediction
 															prediction_SDM <- predict(model_SDM, BV_ras, 
-																												filename = file.path(Dir.Species, "prediction"), 
+																	filename = file.path(Dir.Species, "prediction.tif"), 
 																												overwrite = TRUE)
 															# this block is needed to load fully into memory
-															ensemble_SDM <- readAll(ensemble_SDM)
 															modelnames <- with(model_SDM@run.info, paste(method, replication, replicationID, sep ="-"))
-															prediction_SDM <- stack(file.path(Dir.Species, "prediction")) # index on drive
+				prediction_SDM <- stack(file.path(Dir.Species, "prediction.tif")) # index on drive
 															prediction_SDM <- readAll(prediction_SDM) # load fully from file
 															names(prediction_SDM) <- modelnames # assign names back on
 															binarised_SDM <- prediction_SDM > eval_SDM$threshold ## is this correct!!!
@@ -294,13 +293,13 @@ FUN.ExecSDM <- function(SDMData_ls = NULL, # list of presences/absences per spec
 															
 															## save rasters
 															raster::writeRaster(ensemble_SDM, 
-																									filename = file.path(Dir.Species, "Continuous.nc"), format = "CDF")
+														filename = file.path(Dir.Species, "Continuous.nc"), format = "CDF", overwrite = TRUE)
 															raster::writeRaster(prediction_SDM, 
-																									filename = file.path(Dir.Species, "MODELS-Continuous.nc"), format = "CDF")
+														filename = file.path(Dir.Species, "MODELS-Continuous.nc"), format = "CDF", overwrite = TRUE)
 															raster::writeRaster(binarised_SDM, 
-																									filename = file.path(Dir.Species, "MODELS-Binarised.nc"), format = "CDF")
+														filename = file.path(Dir.Species, "MODELS-Binarised.nc"), format = "CDF", overwrite = TRUE)
 															raster::writeRaster(proportion_SDM, 
-																									filename = file.path(Dir.Species, "Proportion.nc"), format = "CDF")
+														filename = file.path(Dir.Species, "Proportion.nc"), format = "CDF", overwrite = TRUE)
 															
 															## make a list of outputs
 															SDMData_ls <- list(
@@ -317,9 +316,9 @@ FUN.ExecSDM <- function(SDMData_ls = NULL, # list of presences/absences per spec
 															saveObj(SDMData_ls, file = FNAMEInner)
 															
 															## unlink SDM workflow files
-															unlink(list.files(Dir.Species, pattern = "prediction", full.names = TRUE))
-															unlink(list.files(Dir.Species, pattern = "ensemble", full.names = TRUE))
-															unlink(list.files(Dir.Species, pattern = "SDMModel", full.names = TRUE))
+				# unlink(list.files(Dir.Species, pattern = "prediction", full.names = TRUE))
+				# unlink(list.files(Dir.Species, pattern = "ensemble", full.names = TRUE))
+				# unlink(list.files(Dir.Species, pattern = "SDMModel", full.names = TRUE))
 														}
 														
 			if(length(list.files(Dir.Species, pattern = "RESPCURV")) == terra::nlyr(Drivers)){

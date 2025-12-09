@@ -274,6 +274,7 @@ FUN.DownBV <- function(T_Start = 1970, # what year to begin climatology calculat
 		DEDL = DEDL,
 		Cores = Cores
 	)
+	names(BV_ras) <- paste0("BIO", 1:19)
 	
 	### JSON RO-CRATE creation ----
 	JSON_ls <- jsonlite::read_json("ro-crate-metadata.json")
