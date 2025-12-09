@@ -188,9 +188,11 @@ FUN.DownGBIF <- function(species = NULL, # species name as character for whose g
 FUN.DownBV <- function(T_Start = 1970, # what year to begin climatology calculation in
 											 T_End = 2000, # what year to end climatology calculation in
 											 Dir = getwd(), # where to store the data output on disk
-											 Force = FALSE # do not overwrite already present data
+											 Force = FALSE, # do not overwrite already present data
+											 DEDL = FALSE, 
+											 Cores = 1
 											 ){
-	FNAME <- file.path(Dir, paste0("BV_", T_Start, "-", T_End, ".nc"))
+	FNAME <- file.path(Dir, paste0("BV_", T_Start, "-", T_End, "_DEDL.nc"))
 	
 	if(!Force & file.exists(FNAME)){
 		BV_ras <- stack(FNAME)
@@ -215,7 +217,10 @@ FUN.DownBV <- function(T_Start = 1970, # what year to begin climatology calculat
 			Extent = ne_countries(type = "countries", scale = "medium")[,1],
 			FileName = "Qsoil1",
 			API_User = API_User,
-			API_Key = API_Key
+			API_Key = API_Key,
+			TChunkSize = 24 * 12,
+			DEDL = DEDL,
+			Cores = Cores
 		)
 		
 		Qsoil2_ras <- CDownloadS(
@@ -229,7 +234,10 @@ FUN.DownBV <- function(T_Start = 1970, # what year to begin climatology calculat
 			Extent = ne_countries(type = "countries", scale = "medium")[,1],
 			FileName = "Qsoil2",
 			API_User = API_User,
-			API_Key = API_Key
+			API_Key = API_Key,
+			TChunkSize = 24 * 12,
+			DEDL = DEDL,
+			Cores = Cores
 		)	
 		
 		#### Combining ----
@@ -261,7 +269,10 @@ FUN.DownBV <- function(T_Start = 1970, # what year to begin climatology calculat
 		Dir = Dir, FileName = basename(FNAME),
 		FileExtension = ".nc", Compression = 9, # file storing
 		API_User = API_User,
-		API_Key = API_Key
+		API_Key = API_Key,
+		TChunkSize = 720, # roughly one month
+		DEDL = DEDL,
+		Cores = Cores
 	)
 	
 	### JSON RO-CRATE creation ----

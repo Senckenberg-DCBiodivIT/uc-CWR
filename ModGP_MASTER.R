@@ -17,13 +17,21 @@ rm(list=ls())
 
 # Read species from command-line argument
 args = commandArgs(trailingOnly=TRUE)
-if (length(args)==0) {
-	# Default species
-	SPECIES <- "Lathyrus"
-} else {
+# SPECIES (first argument)
+if (length(args) >= 1) {
 	SPECIES <- args[1]
+} else {
+	SPECIES <- "Lathyrus"
 }
 message(sprintf("SPECIES = %s", SPECIES))
+
+# ERA5 data source (second argument)
+if (length(args) >= 2) {
+	DEDL <- toupper(args[2]) %in% c("TRUE", "T", "1")
+} else {
+	DEDL <- FALSE
+}
+message(paste0('Datasource DEDL = ', DEDL))
 
 ## Directories ------------------------------------------------------------
 ### Define directories in relation to project directory
@@ -34,6 +42,11 @@ source(file.path(Dir.Scripts, "ModGP-commonlines.R"))
 
 ## API Credentials --------------------------------------------------------
 try(source(file.path(Dir.Scripts, "SHARED-APICredentials.R")))
+if (DEDL) {
+	API_User <- DEDL_User
+	API_Key <- DEDL_Pwd
+}
+
 if (!exists("API_User")) {
 	API_User <- "none@"
 }
@@ -79,7 +92,9 @@ message("Retrieving environmental data")
 BV_ras <- FUN.DownBV(T_Start = 1985, # what year to begin climatology calculation in
 										 T_End = 2015, # what year to end climatology calculation in
 										 Dir = Dir.Data.Envir, # where to store the data output on disk
-										 Force = FALSE # do not overwrite already present data
+										 Force = FALSE, # do not overwrite already present data
+										 DEDL = DEDL, 
+										 Cores = numberOfCores
 										 )
 
 ## Posthoc Data -----------------------------------------------------------
