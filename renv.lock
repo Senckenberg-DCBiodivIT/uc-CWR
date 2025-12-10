@@ -138,7 +138,8 @@
         "reticulate",
         "methods",
         "future",
-        "future.apply"
+        "future.apply",
+        "usethis"
       ],
       "Depends": [
         "R (>= 4.0.0)"
@@ -148,7 +149,7 @@
       "RemoteRepo": "KrigR",
       "RemoteUsername": "Senckenberg-DCBiodivIT",
       "RemoteRef": "add-alternative-data-source-DEDL",
-      "RemoteSha": "c166b5e3e4b0487ff6ef3088289c753c4e4dc66d",
+      "RemoteSha": "9ff69370994162156cf68129bba203a3bf7d40d5",
       "NeedsCompilation": "no",
       "Author": "Erik Kusch [aut, cre], Richard Davy [aut], Lena Perzlmaier [ctb]",
       "Maintainer": "Erik Kusch <erik@i-solution.de>"
