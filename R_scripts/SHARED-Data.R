@@ -58,21 +58,32 @@ FUN.DownGBIF <- function(species = NULL, # species name as character for whose g
 	}
 	
 	## GBIF Data Query ----
-	message(paste("## Downloading", 
-								occ_count(taxonKey = tax_ID, 
-													hasCoordinate = TRUE,
-													occurrenceStatus = "PRESENT"), 
-								"GBIF records"))
-	occ_down <- occ_download(pred("taxonKey", tax_ID), 
-													 pred("hasCoordinate", TRUE),
-													 pred("occurrenceStatus", "PRESENT"),
-													 format = "SIMPLE_CSV")
-	curlopts <- list(http_version = 2) # needed on Mac to avoid HTTP issues in next line (see here: https://github.com/ropensci/rgbif/issues/579)
-	occ_meta <- occ_download_wait(occ_down, status_ping = 30, 
-																curlopts = list(), quiet = FALSE) # wait for download to finish
-	occ_get <- occ_download_get(occ_down, path = Dir) # download data
-	curlopts <- list(http_version = 1) # resetting this to not affect other functions
-	
+	message(paste(
+		"## Downloading",
+		occ_count(
+			taxonKey = tax_ID,
+			hasCoordinate = TRUE,
+			occurrenceStatus = "PRESENT"
+		),
+		"GBIF records"
+	))
+	occ_down <- occ_download(pred("taxonKey", tax_ID),
+		pred("hasCoordinate", TRUE),
+		pred("occurrenceStatus", "PRESENT"),
+		format = "SIMPLE_CSV"
+	)
+
+	occ_meta <- occ_download_wait(
+		occ_down, 
+		status_ping = 30
+		)
+		
+	occ_get <- occ_download_get(
+		occ_down,
+		path = Dir,
+		curlopts = list(http_version = 1)
+		)
+
 	## Data Loading ----
 	message("Loading GBIF Data into R")
 	occ_occ <- occ_download_import(occ_get) # import downloaded data
