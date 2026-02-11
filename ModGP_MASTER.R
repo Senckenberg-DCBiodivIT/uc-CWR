@@ -25,12 +25,18 @@ if (length(args) >= 1) {
 }
 message(sprintf("SPECIES = %s", SPECIES))
 
-# ERA5 data source (second argument)
-if (length(args) >= 2) {
-	DEDL <- toupper(args[2]) %in% c("TRUE", "T", "1")
+# Climatological reference(second argument)
+if (length(args) >= 3) {
+	T_Start <- as.numeric(args[2])
+	T_End <- as.numeric(args[3])
 } else {
-	DEDL <- FALSE
+	T_Start <- 1985
+	T_End <- 2015
 }
+message(sprintf("T_Start = %d, T_End = %d", T_Start, T_End))
+
+# ERA5 data source 
+DEDL <- TRUE
 message(paste0('Datasource DEDL = ', DEDL))
 
 ## Directories ------------------------------------------------------------
@@ -89,12 +95,13 @@ Species_ls <- FUN.DownGBIF(
 
 ## Environmental Data -----------------------------------------------------
 message("Retrieving environmental data")
-BV_ras <- FUN.DownBV(T_Start = 1985, # what year to begin climatology calculation in
-										 T_End = 2015, # what year to end climatology calculation in
-										 Dir = Dir.Data.Envir, # where to store the data output on disk
-										 Force = FALSE, # do not overwrite already present data
-										 DEDL = DEDL, 
-										 Cores = numberOfCores
+BV_ras <- FUN.DownBV(
+	T_Start = T_Start, # what year to begin climatology calculation in
+	T_End = T_End, # what year to end climatology calculation in
+	Dir = Dir.Data.Envir, # where to store the data output on disk
+	Force = FALSE, # do not overwrite already present data
+	DEDL = DEDL, 
+	Cores = numberOfCores
 )
 
 ## Posthoc Data -----------------------------------------------------------
