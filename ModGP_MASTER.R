@@ -121,7 +121,9 @@ SDMInput_ls <- FUN.PrepSDMData(occ_ls = Species_ls$occs, # list of occurrence da
 															 BV_ras = BV_ras, # bioclimatic rasterstack
 															 Dir = Dir.Data.ModGP, # where to store the data output on disk
 															 Force = FALSE, # # do not overwrite already present data
-															 parallel = numberOfCores # parallelised execution
+															 parallel = numberOfCores, # parallelised execution
+															 Occurrences = 200,
+															 Locations = 200
 )
 
 # ANALYSIS ================================================================
