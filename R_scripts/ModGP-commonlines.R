@@ -3,12 +3,6 @@ RUNNING_ON_LUMI <- FALSE
 RUNNING_ON_DESTINE <- FALSE
 
 ## Packages ---------------------------------------------------------------
-install.load.package <- function(x) {
-	if (!require(x, character.only = TRUE))
-		install.packages(x, repos='http://cran.us.r-project.org')
-	require(x, character.only = TRUE)
-}
-### CRAN PACKAGES ----
 package_vec <- c(
 	'cowplot', # grid plotting
 	'ggplot2', # ggplot machinery
@@ -28,23 +22,28 @@ package_vec <- c(
 	'tidyr', # gather()
 	'usdm', # vifcor()
 	'viridis', # colour palette
-	'iterators'
+	'iterators',
+	'KrigR',
+	'mraster'
 )
-sapply(package_vec, install.load.package)
+
+
+require('ggpmisc') # table plotting in ggplot environment
+require('ggpubr') # t-test comparison in ggplot
+require('parallel') # parallel runs
+require('rgbif') # GBIF access
+library('sdm')
+require('dismo')
+require('rJava')
+require('gbm')
+require('bit64')
+require('rnaturalearthdata')
 
 ### NON-CRAN PACKAGES ----
-devtools::install_github("https://github.com/LeniPe/KrigR", ref = "add-alternative-data-source-DEDL")
+# for developping always install the latest version of KrigR
+renv::install("Senckenberg-DCBiodivIT/KrigR@add-alternative-data-source-DEDL")
 library(KrigR)
-
-if("mraster" %in% rownames(installed.packages()) == FALSE){ # KrigR check
-	remotes::install_github("babaknaimi/mraster")
-}
 library(mraster)
-
-if(!("maxent" %in% unlist(getmethodNames()))){sdm::installAll()} # install methods for sdm package
-
-## updating package_vec for handling of parallel environments
-package_vec <- c(package_vec, "KrigR", "mraster")
 
 ## Functionality ----------------------------------------------------------
 `%nin%` <- Negate(`%in%`) # a function for negation of %in% function

@@ -52,11 +52,13 @@ FUN.PrepSDMData <- function(occ_ls = NULL, # list of occurrences per species in 
 		on.exit(stopCluster(parallel))
 		print("R Objects loading to cluster")
 		parallel::clusterExport(parallel, varlist = c(
-			"package_vec", "install.load.package",
+			"package_vec",
 			"Species_sf", "BV_ras"
 		), envir = environment())
 		print("R Packages loading on cluster")
-		clusterpacks <- clusterCall(parallel, function() sapply(package_vec, install.load.package))
+		clusterCall(parallel, function() {
+			lapply(package_vec, library, character.only = TRUE)
+		})
 	}
 	
 	### Preparing Data Species by Species ----
@@ -212,13 +214,15 @@ FUN.ExecSDM <- function(SDMData_ls = NULL, # list of presences/absences per spec
 		on.exit(stopCluster(parallel))
 		print("R Objects loading to cluster")
 		parallel::clusterExport(parallel, varlist = c(
-			"package_vec", "install.load.package",
+			"package_vec",
 			"BV_ras", "Drivers", "Dir", "Dir.Genus", "Dir.Base",
 			"GenName", "FUN.Viz", "FUN.ShinyPrep", "Plot_BC", "%nin%",
 			"parallel", "RUNNING_ON_LUMI", "RUNNING_ON_DESTINE", "saveObj", "loadObj")
 			, envir = environment())
 		print("R Packages loading on cluster")
-		clusterpacks <- clusterCall(parallel, function() sapply(package_vec, install.load.package))
+		clusterCall(parallel, function() {
+			lapply(package_vec, library, character.only = TRUE)
+		})
 	}
 	
 	SDMModel_ls <- pbapply::pblapply(SDMData_ls, 
