@@ -61,7 +61,7 @@ loadObj <- function(file.name){
 	chunksize <- ceiling(filesize / 100)
 	pb <- txtProgressBar(min = 0, max = 100, style=3)
 	infile <- file(file.name, "rb")
-	data <- foreach(it = icount(100), .combine = c) %do% {
+	data <- foreach(it = iterators::icount(100), .combine = c) %do% {
 		setTxtProgressBar(pb, it)
 		readBin(infile, "raw", chunksize)
 	}

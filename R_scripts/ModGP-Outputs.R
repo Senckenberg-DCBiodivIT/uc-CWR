@@ -24,9 +24,9 @@ Plot_BC <- function(BC_ras, Shp = NULL, Water_Var = "Precipitation", which = "Al
 		Plot_df <- BC_df[, c("x", "y", Plot_Iter)]
 		colnames(Plot_df)[3] <- "value"
 		if(as.numeric(strsplit(Plot_Iter, split = "BIO")[[1]][2]) < 12){
-			col_grad <- inferno(1e3) 
+			col_grad <- viridis::inferno(1e3) 
 		}else{
-			col_grad <- mako(1e3)
+			col_grad <- viridis::mako(1e3)
 		}
 		BC_plot <- ggplot() + # create a plot
 			geom_raster(data = Plot_df, aes(x = x, y = y, fill = value)) + # plot the raw data
@@ -52,10 +52,10 @@ FUN.ShinyPrep <- function(PA, Dir_spec){
 	Pres_df <- PA[PA$PRESENCE == 1, c("lat", "lon", "gbifID", "PRESENCE")]
 	Abs_df <- PA[PA$PRESENCE == 0, c("lat", "lon", "gbifID", "PRESENCE")]
 	
-	Pres_sf <- st_as_sf(Pres_df, coords = c("lon", "lat"))
-	Abs_sf <- st_as_sf(Abs_df, coords = c("lon", "lat"))
+	Pres_sf <- sf::st_as_sf(Pres_df, coords = c("lon", "lat"))
+	Abs_sf <- sf::st_as_sf(Abs_df, coords = c("lon", "lat"))
 	
-	Buffer_sf <- st_union(st_buffer(Pres_sf, 15))
+	Buffer_sf <- sf::st_union(sf::st_buffer(Pres_sf, 15))
 	
 	Shiny_ls <- list(Presences = Pres_sf,
 									 Absences = Abs_sf,
@@ -79,8 +79,8 @@ FUN.Viz <- function(Shiny_ls, Model_ras, BV_ras,
 		data.frame(PRESENCE = c(Shiny_ls$Presences$PRESENCE,
 														Shiny_ls$Absences$PRESENCE)),
 		rbind(
-			st_coordinates(Shiny_ls$Presences), 
-			st_coordinates(Shiny_ls$Absences)
+			sf::st_coordinates(Shiny_ls$Presences), 
+			sf::st_coordinates(Shiny_ls$Absences)
 		)
 	)
 	
@@ -91,10 +91,10 @@ FUN.Viz <- function(Shiny_ls, Model_ras, BV_ras,
 	
 	
 	## SDM Input Visualisation ----
-	First_gg <- Plot_BC(BV_iter, as_Spatial(buffer_sf), which = names(BV_iter)[1]) + 
+	First_gg <- Plot_BC(BV_iter, sf::as_Spatial(buffer_sf), which = names(BV_iter)[1]) + 
 		geom_point(aes(x = X, y = Y, color = factor(PRESENCE)), data = PA_df, size = 1, pch = 4) +
 		scale_color_manual(values = c("black", "white")) 
-	Subseq_gg <- Plot_BC(BV_iter, as_Spatial(buffer_sf), which = names(BV_iter)[-1])
+	Subseq_gg <- Plot_BC(BV_iter, sf::as_Spatial(buffer_sf), which = names(BV_iter)[-1])
 	
 	Input_plot <- cowplot::plot_grid(First_gg, Subseq_gg, ncol = 1, 
 																	 rel_heights = c(1, floor((length(names(BV_iter))-1)/2)))
@@ -103,7 +103,7 @@ FUN.Viz <- function(Shiny_ls, Model_ras, BV_ras,
 	
 	## Binarised plot ----
 	Binarised1_df <- as.data.frame(Model_ras$Proportion>CutOff, xy = TRUE) # turn raster into dataframe
-	Probability_df <- gather(data = Binarised1_df, key = Values, value = "value", colnames(Binarised1_df)[c(-1, -2)]) #  make ggplot-ready
+	Probability_df <- tidyr::gather(data = Binarised1_df, key = Values, value = "value", colnames(Binarised1_df)[c(-1, -2)]) #  make ggplot-ready
 	Binarised_plot <- ggplot() + # create plot
 		geom_raster(data = Probability_df, aes(x = x, y = y, fill = value)) + # plot the covariate data
 		theme_bw() + facet_wrap(~Values, ncol = 4) + 
@@ -116,12 +116,12 @@ FUN.Viz <- function(Shiny_ls, Model_ras, BV_ras,
 	
 	## Proportion plot ----
 	Probability1_df <- as.data.frame(Model_ras$Proportion, xy = TRUE) # turn raster into dataframe
-	Probability_df <- gather(data = Probability1_df, key = Values, value = "value", colnames(Probability1_df)[c(-1, -2)]) #  make ggplot-ready
+	Probability_df <- tidyr::gather(data = Probability1_df, key = Values, value = "value", colnames(Probability1_df)[c(-1, -2)]) #  make ggplot-ready
 	Proportion_plot <- ggplot() + # create plot
 		geom_raster(data = Probability_df, aes(x = x, y = y, fill = value)) + # plot the covariate data
 		theme_bw() + facet_wrap(~Values, ncol = 4) + 
 		labs(x = "Longitude", y = "Latitude") + # make plot more readable
-		scale_fill_gradientn(colors = viridis(100), na.value = "transparent") + # add colour and legend
+		scale_fill_gradientn(colors = viridis::viridis(100), na.value = "transparent") + # add colour and legend
 		theme(plot.margin = unit(c(0, 0, 0, 0), "cm")) + # reduce margins (for fusing of plots)
 		theme(legend.key.size = unit(1, 'cm'), legend.position = "bottom")
 	ggsave(Proportion_plot, filename = file.path(Dir_spec, "OUT_Proportion.png"), 
@@ -129,12 +129,12 @@ FUN.Viz <- function(Shiny_ls, Model_ras, BV_ras,
 	
 	## Probability plot ----
 	Probability1_df <- as.data.frame(Model_ras$Continuous, xy = TRUE) # turn raster into dataframe
-	Probability_df <- gather(data = Probability1_df, key = Values, value = "value", colnames(Probability1_df)[c(-1, -2)]) #  make ggplot-ready
+	Probability_df <- tidyr::gather(data = Probability1_df, key = Values, value = "value", colnames(Probability1_df)[c(-1, -2)]) #  make ggplot-ready
 	Probability_plot <- ggplot() + # create plot
 		geom_raster(data = Probability_df, aes(x = x, y = y, fill = value)) + # plot the covariate data
 		theme_bw() + facet_wrap(~Values, ncol = 4) + 
 		labs(x = "Longitude", y = "Latitude") + # make plot more readable
-		scale_fill_gradientn(colors = viridis(100), na.value = "transparent") + # add colour and legend
+		scale_fill_gradientn(colors = viridis::viridis(100), na.value = "transparent") + # add colour and legend
 		theme(plot.margin = unit(c(0, 0, 0, 0), "cm")) + # reduce margins (for fusing of plots)
 		theme(legend.key.size = unit(1, 'cm'), legend.position = "bottom")
 	ggsave(Probability_plot, filename = file.path(Dir_spec, "OUT_Suitability.png"), 

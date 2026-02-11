@@ -111,7 +111,7 @@ FUN.DownGBIF <- function(species = NULL, # species name as character for whose g
 	GBIF_specs <- unique(occ_occ$species)
 	
 	## Making a list of spatialfeatures MULTIPOINT objects denoting unique locations of presence per species
-	specs_ls <- pblapply(GBIF_specs, 
+	specs_ls <- pbapply::pblapply(GBIF_specs, 
 											 cl = parallel,
 											 FUN = function(x){
 											 	spec_df <- occ_occ[occ_occ$species == x, ]
@@ -122,7 +122,7 @@ FUN.DownGBIF <- function(species = NULL, # species name as character for whose g
 											 										 	"eventDate", "basisOfRecord", "recordNumber", "issue")
 											 	]
 											 	spec_df$presence <- 1
-											 	st_as_sf(spec_df, coords = c("decimalLongitude", "decimalLatitude"))
+											 	sf::st_as_sf(spec_df, coords = c("decimalLongitude", "decimalLatitude"))
 											 })
 	names(specs_ls) <- GBIF_specs
 	
@@ -137,8 +137,8 @@ FUN.DownGBIF <- function(species = NULL, # species name as character for whose g
 		CapfitogenData$ACCENUMB <- seq(from = 1, to = nrow(CapfitogenData), by = 1)
 		## Add in the species, latitude and longitude (nothing else at this point)
 		CapfitogenData$SPECIES <- specs_ls$species
-		CapfitogenData$DECLATITUDE <- st_coordinates(specs_ls)[,"Y"]
-		CapfitogenData$DECLONGITUDE <- st_coordinates(specs_ls)[,"X"]
+		CapfitogenData$DECLATITUDE <- sf::st_coordinates(specs_ls)[,"Y"]
+		CapfitogenData$DECLONGITUDE <- sf::st_coordinates(specs_ls)[,"X"]
 		specs_ls <- CapfitogenData
 	}
 	

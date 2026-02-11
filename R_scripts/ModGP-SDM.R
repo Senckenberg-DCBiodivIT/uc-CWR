@@ -61,7 +61,7 @@ FUN.PrepSDMData <- function(occ_ls = NULL, # list of occurrences per species in 
 	
 	### Preparing Data Species by Species ----
 	message("Figuring out Presences and Absences for each species")
-	SDMData_ls <- pblapply(occ_ls, 
+	SDMData_ls <- pbapply::pblapply(occ_ls, 
 												 cl = parallel,
 												 FUN = function(SDMData_iter){
 												 	# SDMData_iter <- occ_ls[[1]]
@@ -69,25 +69,25 @@ FUN.PrepSDMData <- function(occ_ls = NULL, # list of occurrences per species in 
 												 	print(unique(SDMData_iter$species))
 												 	
 												 	### Initial Environmental NA match Removal ----
-												 	NAcheck <- terra::extract(BV_ras, st_coordinates(Presences_sf))
+												 	NAcheck <- terra::extract(BV_ras, sf::st_coordinates(Presences_sf))
 												 	Presences_sf <- Presences_sf[!is.na(rowSums(NAcheck)), ]
 												 	if(nrow(Presences_sf) < 1){
 												 		PA_df <- data.frame(Presences_sf)
 												 	}else{
 												 		### Training Region Limiting ----
-												 		buffer_sf <- st_union(st_buffer(Presences_sf, 15)) # 15 degree buffer around points
+												 		buffer_sf <- sf::st_union(sf::st_buffer(Presences_sf, 15)) # 15 degree buffer around points
 												 		
 												 		### Environmental Data Colinearity ----
-												 		BV_iter <- crop(BV_ras, extent(st_bbox(buffer_sf)))
+												 		BV_iter <- crop(BV_ras, extent(sf::st_bbox(buffer_sf)))
 												 		BV_iter <- mask(BV_iter, terra::vect(buffer_sf))
 												 		v <- usdm::vifcor(BV_iter, th = 0.7) # variable inflation factor
-												 		biomod <- exclude(BV_iter, v) # now exclude those with high cor and vif
+												 		biomod <- usdm::exclude(BV_iter, v) # now exclude those with high cor and vif
 												 		
 												 		### Pseudoabsences ----
 												 		#' to generate pseudo-absence points. 1e4 randomly selected points where the model target is absent but other species are present this can be further modified - for example limiting it by minimum convex that encompasses only 90% of the occurrence data 10% of the distant occurrence points won't be considered 
 												 		#' Absences
 												 		SpeciesNon_sf <- Species_sf[Species_sf$species != unique(SDMData_iter$species), ] # select non-target species records
-												 		SpeciesNon_sf <- st_filter(SpeciesNon_sf, buffer_sf) # select only those in buffered area
+												 		SpeciesNon_sf <- sf::st_filter(SpeciesNon_sf, buffer_sf) # select only those in buffered area
 												 		set.seed(42) # setting seed for reproducibly random process
 												 		Absences_sf <- SpeciesNon_sf[sample(1:nrow(SpeciesNon_sf), 
 												 																				size = ifelse(nrow(SpeciesNon_sf)>1e4, 1e4, nrow(SpeciesNon_sf))), ] # select absences
@@ -100,13 +100,13 @@ FUN.PrepSDMData <- function(occ_ls = NULL, # list of occurrences per species in 
 												 		PA_sf <- rbind(Absences_sf, Presences_sf)
 												 		
 												 		### Extracting Environmental data ----
-												 		Predictors <- raster::extract(biomod, st_coordinates(PA_sf))
+												 		Predictors <- raster::extract(biomod, sf::st_coordinates(PA_sf))
 												 		PA_sf <- cbind(PA_sf, Predictors)
 												 		
 												 		### Making into dataframe ----
 												 		PA_df <- as.data.frame(PA_sf)
-												 		lon <- PA_df$lon <- st_coordinates(PA_sf)[,1]
-												 		lat <- PA_df$lat <- st_coordinates(PA_sf)[,2]
+												 		lon <- PA_df$lon <- sf::st_coordinates(PA_sf)[,1]
+												 		lat <- PA_df$lat <- sf::st_coordinates(PA_sf)[,2]
 												 		# PA_df <- na.omit(PA_df)
 												 	}
 												 	
@@ -133,10 +133,10 @@ FUN.PrepSDMData <- function(occ_ls = NULL, # list of occurrences per species in 
 												 	}else{
 												 		## load covariates raster in
 												 		cov <- BV_ras[[1]]
-												 		cov_crs <- st_crs(cov)
+												 		cov_crs <- sf::st_crs(cov)
 												 		## assign correct crs
-												 		Occ_sf <- st_as_sf(Occ_df, crs = '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0')
-												 		Occ_sf <- st_transform(Occ_sf, crs = cov_crs)
+												 		Occ_sf <- sf::st_as_sf(Occ_df, crs = '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0')
+												 		Occ_sf <- sf::st_transform(Occ_sf, crs = cov_crs)
 												 		## filter additionally by covariate data
 												 		valsext <- terra::extract(y = Occ_sf[Occ_sf$PRESENCE == 1, ], x = cov)
 												 		useableocc <- sum(!is.na(valsext$BIO1))
@@ -221,7 +221,7 @@ FUN.ExecSDM <- function(SDMData_ls = NULL, # list of presences/absences per spec
 		clusterpacks <- clusterCall(parallel, function() sapply(package_vec, install.load.package))
 	}
 	
-	SDMModel_ls <- pblapply(SDMData_ls, 
+	SDMModel_ls <- pbapply::pblapply(SDMData_ls, 
 													cl = parallel,
 													FUN = function(SDMModel_Iter){
 														# SDMModel_Iter <- SDMData_ls[[1]]
