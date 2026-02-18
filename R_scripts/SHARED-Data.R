@@ -247,7 +247,7 @@ FUN.DownBV <- function(T_Start = 1970, # what year to begin climatology calculat
 			API_User = API_User,
 			API_Key = API_Key,
 			TChunkSize = 24 * 12,
-			DEDL = DEDL,
+			DEDL = DEDL,	
 			Cores = Cores
 		)	
 		
@@ -265,6 +265,8 @@ FUN.DownBV <- function(T_Start = 1970, # what year to begin climatology calculat
 		
 		### Deleting unnecessary files ----
 		unlink(list.files(Dir, pattern = "Qsoil", full.names = TRUE))
+	} else {
+	   message(paste0(FNAME_RAW, " already exists. Loading from disk."))
 	}
 	
 	### Bioclimatic data ----
