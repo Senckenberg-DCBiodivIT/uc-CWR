@@ -260,7 +260,7 @@ FUN.DownBV <- function(T_Start = 1970, # what year to begin climatology calculat
 			NC = QSoilCombin_ras, 
 			FName = FNAME_RAW,
 			Attrs = terra::metags(QSoilCombin_ras), Write = TRUE,
-			Compression = 9
+			Compression = 5
 		)
 		
 		### Deleting unnecessary files ----
@@ -278,7 +278,7 @@ FUN.DownBV <- function(T_Start = 1970, # what year to begin climatology calculat
 		Y_start = T_Start, Y_end = T_End,
 		Extent = rnaturalearth::ne_countries(type = "countries", scale = "medium")[,1],
 		Dir = Dir, FileName = basename(FNAME),
-		FileExtension = ".nc", Compression = 9, # file storing
+		FileExtension = ".nc", Compression = 5, # file storing
 		API_User = API_User,
 		API_Key = API_Key,
 		TChunkSize = 720, # roughly one month
