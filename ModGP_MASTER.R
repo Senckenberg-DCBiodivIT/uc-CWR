@@ -20,8 +20,12 @@ args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
 	# Default species
 	SPECIES <- "Lathyrus"
+	T_Start <- 1985
+	T_End <- 2015
 } else {
 	SPECIES <- args[1]
+	T_Start <- if (length(args) > 1) as.numeric(args[2]) else 1985
+	T_End <- if (length(args) > 2) as.numeric(args[3]) else 2015
 }
 message(sprintf("SPECIES = %s", SPECIES))
 
@@ -76,8 +80,8 @@ Species_ls <- FUN.DownGBIF(
 
 ## Environmental Data -----------------------------------------------------
 message("Retrieving environmental data")
-BV_ras <- FUN.DownBV(T_Start = 1985, # what year to begin climatology calculation in
-										 T_End = 2015, # what year to end climatology calculation in
+BV_ras <- FUN.DownBV(T_Start = T_Start, # what year to begin climatology calculation in
+										 T_End = T_End, # what year to end climatology calculation in
 										 Dir = Dir.Data.Envir, # where to store the data output on disk
 										 Force = FALSE # do not overwrite already present data
 										 )

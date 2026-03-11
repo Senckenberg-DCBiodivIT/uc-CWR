@@ -6,7 +6,23 @@
 
 ## ModGP on Rstudio
 
-1. Source `ModGP_MASTER.R` and change `SPECIES` argument at line 19 to execute ModGP pipeline for a specific genus.
+1. Run `ModGP_MASTER.R` with command-line arguments to execute the ModGP pipeline:
+
+       Rscript ModGP_MASTER.R <SPECIES> [T_Start] [T_End]
+
+   **Arguments:**
+   - `SPECIES` (required): The genus name to analyze (e.g., `Lathyrus`)
+   - `T_Start` (optional): Start year for climatology calculation (default: 1985)
+   - `T_End` (optional): End year for climatology calculation (default: 2015)
+
+   **Examples:**
+   ```bash
+   # Using defaults (1985-2015)
+   Rscript ModGP_MASTER.R Lathyrus
+   
+   # Custom time period
+   Rscript ModGP_MASTER.R Lathyrus 1990 2020
+   ```
 
 ## ModGP on LUMI with Hyperqueue
 
