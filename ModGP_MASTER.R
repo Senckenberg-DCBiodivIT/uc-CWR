@@ -22,10 +22,14 @@ if (length(args)==0) {
 	SPECIES <- "Lathyrus"
 	T_Start <- 1985
 	T_End <- 2015
+	Occurrences <- 40
+	Locations <- 40
 } else {
 	SPECIES <- args[1]
 	T_Start <- if (length(args) > 1) as.numeric(args[2]) else 1985
 	T_End <- if (length(args) > 2) as.numeric(args[3]) else 2015
+	Occurrences <- if (length(args) > 3) as.numeric(args[4]) else 40
+	Locations <- if (length(args) > 4) as.numeric(args[5]) else 40
 }
 message(sprintf("SPECIES = %s", SPECIES))
 
@@ -98,12 +102,15 @@ names(PH_stack) <- c("Nutrient", "Toxicity", "Temperature", "Soil Moisture")
 
 ## SDM Data Preparations --------------------------------------------------
 message("Preparing data for SDM workflow")
-SDMInput_ls <- FUN.PrepSDMData(occ_ls = Species_ls$occs, # list of occurrence data frames per species
-															 BV_ras = BV_ras, # bioclimatic rasterstack
-															 Dir = Dir.Data.ModGP, # where to store the data output on disk
-															 Force = FALSE, # # do not overwrite already present data
-															 parallel = numberOfCores # parallelised execution
-															 )
+SDMInput_ls <- FUN.PrepSDMData(
+    occ_ls = Species_ls$occs, # list of occurrence data frames per species
+    BV_ras = BV_ras, # bioclimatic rasterstack
+    Dir = Dir.Data.ModGP, # where to store the data output on disk
+    Force = FALSE, # # do not overwrite already present data
+    parallel = numberOfCores, # parallelised execution
+	Occurrences = Occurrences,
+	Locations = Locations
+)
 
 # ANALYSIS ================================================================
 ## SDM Execution ----------------------------------------------------------

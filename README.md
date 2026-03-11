@@ -8,12 +8,14 @@
 
 1. Run `ModGP_MASTER.R` with command-line arguments to execute the ModGP pipeline:
 
-       Rscript ModGP_MASTER.R <SPECIES> [T_Start] [T_End]
+       Rscript ModGP_MASTER.R <SPECIES> [T_Start] [T_End] [Occurrences] [Locations]
 
    **Arguments:**
    - `SPECIES` (required): The genus name to analyze (e.g., `Lathyrus`)
    - `T_Start` (optional): Start year for climatology calculation (default: 1985)
    - `T_End` (optional): End year for climatology calculation (default: 2015)
+   - `Occurrences` (optional): Minimum number of unique occurrences required to retain a species (default: 40)
+   - `Locations` (optional): Minimum number of unique locations required to retain a species (default: 40)
 
    **Examples:**
    ```bash
