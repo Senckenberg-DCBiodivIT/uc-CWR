@@ -15,6 +15,14 @@
 set.seed(42) # making things reproducibly random
 rm(list=ls())
 
+parse_bool_arg <- function(x, default = FALSE){
+	if (is.null(x) || length(x) == 0 || is.na(x)) return(default)
+	x <- tolower(trimws(as.character(x)))
+	if (x %in% c("1", "true", "t", "yes", "y")) return(TRUE)
+	if (x %in% c("0", "false", "f", "no", "n")) return(FALSE)
+	default
+}
+
 # Read species from command-line argument
 args = commandArgs(trailingOnly=TRUE)
 if (length(args)==0) {
@@ -24,14 +32,29 @@ if (length(args)==0) {
 	T_End <- 2015
 	Occurrences <- 40
 	Locations <- 40
+	ForceGBIF <- TRUE
+	ForceBV <- FALSE
+	ForcePrep <- TRUE
+	ForceExec <- TRUE
 } else {
 	SPECIES <- args[1]
 	T_Start <- if (length(args) > 1) as.numeric(args[2]) else 1985
 	T_End <- if (length(args) > 2) as.numeric(args[3]) else 2015
 	Occurrences <- if (length(args) > 3) as.numeric(args[4]) else 40
 	Locations <- if (length(args) > 4) as.numeric(args[5]) else 40
+	ForceGBIF <- if (length(args) > 6) parse_bool_arg(args[7], TRUE) else TRUE
+	ForceBV <- if (length(args) > 7) parse_bool_arg(args[8], FALSE) else FALSE
+	ForcePrep <- if (length(args) > 8) parse_bool_arg(args[9], TRUE) else TRUE
+	ForceExec <- if (length(args) > 9) parse_bool_arg(args[10], TRUE) else TRUE
 }
-message(sprintf("SPECIES = %s", SPECIES))
+message(sprintf(
+	paste0(
+		"Run parameters: SPECIES=%s; T_Start=%s; T_End=%s; Occurrences=%s; Locations=%s; ",
+		"ForceGBIF=%s; ForceBV=%s; ForcePrep=%s; ForceExec=%s"
+	),
+	SPECIES, T_Start, T_End, Occurrences, Locations,
+	ForceGBIF, ForceBV, ForcePrep, ForceExec
+))
 
 ## Directories ------------------------------------------------------------
 ### Define directories in relation to project directory
@@ -77,7 +100,7 @@ message("Retrieving GBIF data")
 Species_ls <- FUN.DownGBIF(
 	species = SPECIES, # which species to pull data for
 	Dir = Dir.Data.GBIF, # where to store the data output on disk
-	Force = FALSE, # do not overwrite already present data
+	Force = ForceGBIF, # do not overwrite already present data unless forced
 	Mode = "ModGP", # query download for entire genus
 	parallel = 1 # no speed gain here for parallelising on personal machine
 	)
@@ -87,7 +110,7 @@ message("Retrieving environmental data")
 BV_ras <- FUN.DownBV(T_Start = T_Start, # what year to begin climatology calculation in
 										 T_End = T_End, # what year to end climatology calculation in
 										 Dir = Dir.Data.Envir, # where to store the data output on disk
-										 Force = FALSE # do not overwrite already present data
+									 Force = ForceBV # do not overwrite already present data unless forced
 										 )
 
 ## Posthoc Data -----------------------------------------------------------
@@ -106,7 +129,7 @@ SDMInput_ls <- FUN.PrepSDMData(
     occ_ls = Species_ls$occs, # list of occurrence data frames per species
     BV_ras = BV_ras, # bioclimatic rasterstack
     Dir = Dir.Data.ModGP, # where to store the data output on disk
-    Force = FALSE, # # do not overwrite already present data
+	Force = ForcePrep, # do not overwrite already present data unless forced
     parallel = numberOfCores, # parallelised execution
 	Occurrences = Occurrences,
 	Locations = Locations
@@ -119,6 +142,6 @@ SDMModel_ls <- FUN.ExecSDM(
 	SDMData_ls = SDMInput_ls, 
 	BV_ras = BV_ras, 
 	Dir = Dir.Exports.ModGP,
-	Force = FALSE,
+	Force = ForceExec,
 	Drivers = PH_stack,
 	parallel = numberOfCores)

@@ -8,7 +8,7 @@
 
 1. Run `ModGP_MASTER.R` with command-line arguments to execute the ModGP pipeline:
 
-       Rscript ModGP_MASTER.R <SPECIES> [T_Start] [T_End] [Occurrences] [Locations]
+       Rscript ModGP_MASTER.R <SPECIES> [T_Start] [T_End] [Occurrences] [Locations] [ForceGBIF] [ForceBV] [ForcePrep] [ForceExec]
 
    **Arguments:**
    - `SPECIES` (required): The genus name to analyze (e.g., `Lathyrus`)
@@ -16,6 +16,10 @@
    - `T_End` (optional): End year for climatology calculation (default: 2015)
    - `Occurrences` (optional): Minimum number of unique occurrences required to retain a species (default: 40)
    - `Locations` (optional): Minimum number of unique locations required to retain a species (default: 40)
+   - `ForceGBIF` (optional): Whether to force re-download of GBIF data (default: TRUE)
+   - `ForceBV` (optional): Whether to force re-download of bioclimatic variables (default: FALSE)
+   - `ForcePrep` (optional): Whether to force re-execution of data preparation steps (default: TRUE)
+   - `ForceExec` (optional): Whether to force re-execution of the ModGP modeling steps (default: TRUE)
 
    **Examples:**
    ```bash
