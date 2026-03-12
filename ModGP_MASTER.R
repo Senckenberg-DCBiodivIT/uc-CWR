@@ -42,10 +42,10 @@ if (length(args)==0) {
 	T_End <- if (length(args) > 2) as.numeric(args[3]) else 2015
 	Occurrences <- if (length(args) > 3) as.numeric(args[4]) else 40
 	Locations <- if (length(args) > 4) as.numeric(args[5]) else 40
-	ForceGBIF <- if (length(args) > 6) parse_bool_arg(args[7], TRUE) else TRUE
-	ForceBV <- if (length(args) > 7) parse_bool_arg(args[8], FALSE) else FALSE
-	ForcePrep <- if (length(args) > 8) parse_bool_arg(args[9], TRUE) else TRUE
-	ForceExec <- if (length(args) > 9) parse_bool_arg(args[10], TRUE) else TRUE
+	ForceGBIF <- if (length(args) > 5) parse_bool_arg(args[6], TRUE) else TRUE
+	ForceBV <- if (length(args) > 6) parse_bool_arg(args[7], FALSE) else FALSE
+	ForcePrep <- if (length(args) > 7) parse_bool_arg(args[8], TRUE) else TRUE
+	ForceExec <- if (length(args) > 8) parse_bool_arg(args[9], TRUE) else TRUE
 }
 message(sprintf(
 	paste0(
